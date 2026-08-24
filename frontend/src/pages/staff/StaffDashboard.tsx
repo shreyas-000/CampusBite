@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { formatOrderStatus } from '@/lib/utils'
 
@@ -63,6 +65,24 @@ export default function StaffDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-orders'] })
+    }
+  })
+
+  // Menu items for quick toggle
+  const { data: menuItems } = useQuery<any[]>({
+    queryKey: ['staff-menu'],
+    queryFn: async () => {
+      const { data } = await api.get('/menu/items')
+      return data
+    }
+  })
+
+  const toggleAvailability = useMutation({
+    mutationFn: async ({ id, is_available }: { id: string, is_available: boolean }) => {
+      await api.patch(`/menu/items/${id}`, { is_available })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staff-menu'] })
     }
   })
 
@@ -150,6 +170,29 @@ export default function StaffDashboard() {
           <h1 className="text-3xl font-bold tracking-tight">Staff Dashboard</h1>
           <p className="text-muted-foreground mt-1">Manage live orders in real-time</p>
         </div>
+        
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline">Quick Menu Toggle</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] max-h-[80vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Item Availability</DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4 py-4">
+              {menuItems?.map(item => (
+                <div key={item.id} className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{item.name}</span>
+                  <Switch 
+                    checked={item.is_available} 
+                    onCheckedChange={(c) => toggleAvailability.mutate({ id: item.id, is_available: c })} 
+                    disabled={toggleAvailability.isPending}
+                  />
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 flex-1 overflow-hidden min-h-0">
