@@ -1084,8 +1084,8 @@ Something will. Common issues:
 | 11 | React setup | Foundation for all UI work (Complete) |
 | 12 | Auth UI | Must login before testing any student flow (Complete) |
 | 13 | Student UI | Core product — menu, cart, order tracking (Complete) |
-| 14 | Staff dashboard | Needs real orders to test against |
-| 15 | Admin panel | Needs real data; built last because it's non-critical for demo flow |
+| 14 | Staff dashboard | Needs real orders to test against (Complete) |
+| 15 | Admin panel | Needs real data; built last because it's non-critical for demo flow (Complete) |
 | 16 | Deploy | Ship before demo prep |
 | 17 | Demo prep | Walkthrough and fixes last |
 
