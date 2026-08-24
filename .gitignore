@@ -57,3 +57,7 @@ frontend/dist-ssr/
 # Environment
 .env
 .env*.local
+
+# Project specific
+.omo/
+DEVPLAN.md
