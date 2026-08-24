@@ -4,6 +4,7 @@ from core.database import supabase
 from core.dependencies import get_current_user, require_role
 from schemas.user import User
 from schemas.order import OrderResponse, UpdateStatusRequest, SchedulePickupRequest
+from core.utils import create_notification
 
 router = APIRouter()
 
@@ -94,11 +95,19 @@ async def place_order(current_user: User = Depends(get_current_user)):
     # 7. Return complete order
     return await get_order(order_id, current_user)
 
+
 @router.patch("/{order_id}/status", response_model=OrderResponse)
 async def update_status(order_id: str, body: UpdateStatusRequest, _: User = Depends(require_role("staff", "admin"))):
     response = supabase.table("orders").update({"status": body.status}).eq("id", order_id).execute()
     if not response.data:
         raise HTTPException(status_code=404, detail="Order not found")
+        
+    order = response.data[0]
+    
+    # Trigger notification
+    title = f"Order {body.status.replace('_', ' ').title()}"
+    msg = f"Your order #{order['pickup_token']} is now {body.status.replace('_', ' ')}."
+    create_notification(order["user_id"], title, msg)
         
     # Refetch to get items
     refetch = supabase.table("orders").select("*, order_items(*)").eq("id", order_id).execute()
