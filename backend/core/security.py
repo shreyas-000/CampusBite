@@ -19,6 +19,10 @@ def create_refresh_token(user_id: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
     return jwt.encode({"sub": user_id, "type": "refresh", "exp": expire}, settings.secret_key, algorithm=settings.algorithm)
 
+def create_verification_token(user_id: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    return jwt.encode({"sub": user_id, "type": "verify_email", "exp": expire}, settings.secret_key, algorithm=settings.algorithm)
+
 def decode_token(token: str) -> dict | None:
     try:
         return jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])

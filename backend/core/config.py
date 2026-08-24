@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     razorpay_key_secret: str
     frontend_url: str = "http://localhost:5173"
     allowed_origins: str = "http://localhost:5173"
+    
+    brevo_api_key: str | None = None
+    brevo_sender_email: str = "noreply@campusbite.com"
+    brevo_sender_name: str = "CampusBite"
 
 
 settings = Settings()
