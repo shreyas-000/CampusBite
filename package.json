@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "vercel-build": "npm run build --prefix frontend",
+    "build": "npm run build --prefix frontend"
+  },
   "devDependencies": {
     "vercel": "^59.5.0"
   }
