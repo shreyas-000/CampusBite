@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
-from routers import auth, menu
+from routers import auth, menu, cart, orders, payments
 
 # Phase 3: Configured CORS middleware.
 # (Remaining routers are not yet implemented, they will be uncommented in future phases)
@@ -18,6 +18,9 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(menu.router, prefix="/api/menu", tags=["menu"])
+app.include_router(cart.router, prefix="/api/cart", tags=["cart"])
+app.include_router(orders.router, prefix="/api/orders", tags=["orders"])
+app.include_router(payments.router, prefix="/api/payments", tags=["payments"])
 
 @app.get("/api/health")
 async def health():
