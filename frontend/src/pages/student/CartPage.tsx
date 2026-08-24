@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react'
@@ -16,15 +15,6 @@ export default function CartPage() {
   const { setCart, clearCart } = useCartStore()
   const queryClient = useQueryClient()
   
-  // To handle the Razorpay script
-  useEffect(() => {
-    const script = document.createElement('script')
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-    script.async = true
-    document.body.appendChild(script)
-    return () => { document.body.removeChild(script) }
-  }, [])
-
   const { data: cart, isLoading } = useQuery<Cart>({
     queryKey: ['cart'],
     queryFn: async () => {
@@ -59,6 +49,16 @@ export default function CartPage() {
 
   const checkout = useMutation({
     mutationFn: async () => {
+      if (!(window as any).Razorpay) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+          script.onload = resolve
+          script.onerror = () => reject(new Error('Razorpay SDK failed to load'))
+          document.body.appendChild(script)
+        })
+      }
+      
       // 1. Create order
       const { data: order } = await api.post('/orders')
       
