@@ -1,9 +1,5 @@
 {
-  "name": "campusbite-monorepo",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "cd frontend && npm run dev",
-    "build": "cd frontend && npm install && npm run build"
+  "devDependencies": {
+    "vercel": "^59.5.0"
   }
 }
