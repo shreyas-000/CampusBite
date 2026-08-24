@@ -1081,9 +1081,9 @@ Something will. Common issues:
 | 8 | Payments | Depends on orders; test with Razorpay test mode |
 | 9 | Remaining routers | Favourites, ratings, notifications, analytics |
 | 10 | Alembic | Lock in schema management before frontend |
-| 11 | React setup | Foundation for all UI work |
-| 12 | Auth UI | Must login before testing any student flow |
-| 13 | Student UI | Core product — menu, cart, order tracking |
+| 11 | React setup | Foundation for all UI work (Complete) |
+| 12 | Auth UI | Must login before testing any student flow (Complete) |
+| 13 | Student UI | Core product — menu, cart, order tracking (Complete) |
 | 14 | Staff dashboard | Needs real orders to test against |
 | 15 | Admin panel | Needs real data; built last because it's non-critical for demo flow |
 | 16 | Deploy | Ship before demo prep |

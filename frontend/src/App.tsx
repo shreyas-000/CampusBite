@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuthStore } from '@/store/auth'
+import AuthenticatedLayout from '@/components/shared/AuthenticatedLayout'
+import { Toaster } from '@/components/ui/sonner'
 
 // Auth
 import LoginPage from '@/pages/auth/LoginPage'
@@ -40,21 +42,24 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          <Route path="/" element={<RoleGuard roles={["student"]}><MenuPage /></RoleGuard>} />
-          <Route path="/cart" element={<RoleGuard roles={["student"]}><CartPage /></RoleGuard>} />
-          <Route path="/orders" element={<RoleGuard roles={["student"]}><OrdersPage /></RoleGuard>} />
-          <Route path="/orders/:id" element={<RoleGuard roles={["student"]}><OrderDetailPage /></RoleGuard>} />
-          <Route path="/favourites" element={<RoleGuard roles={["student"]}><FavouritesPage /></RoleGuard>} />
+          <Route element={<AuthenticatedLayout />}>
+            <Route path="/" element={<RoleGuard roles={["student"]}><MenuPage /></RoleGuard>} />
+            <Route path="/cart" element={<RoleGuard roles={["student"]}><CartPage /></RoleGuard>} />
+            <Route path="/orders" element={<RoleGuard roles={["student"]}><OrdersPage /></RoleGuard>} />
+            <Route path="/orders/:id" element={<RoleGuard roles={["student"]}><OrderDetailPage /></RoleGuard>} />
+            <Route path="/favourites" element={<RoleGuard roles={["student"]}><FavouritesPage /></RoleGuard>} />
 
-          <Route path="/staff" element={<RoleGuard roles={["staff", "admin"]}><StaffDashboard /></RoleGuard>} />
-          
-          <Route path="/admin" element={<RoleGuard roles={["admin"]}><AdminDashboard /></RoleGuard>} />
-          <Route path="/admin/menu" element={<RoleGuard roles={["admin"]}><AdminMenu /></RoleGuard>} />
-          <Route path="/admin/users" element={<RoleGuard roles={["admin"]}><AdminUsers /></RoleGuard>} />
-          <Route path="/admin/analytics" element={<RoleGuard roles={["admin"]}><AdminAnalytics /></RoleGuard>} />
-          <Route path="/admin/settings" element={<RoleGuard roles={["admin"]}><AdminSettings /></RoleGuard>} />
+            <Route path="/staff" element={<RoleGuard roles={["staff", "admin"]}><StaffDashboard /></RoleGuard>} />
+            
+            <Route path="/admin" element={<RoleGuard roles={["admin"]}><AdminDashboard /></RoleGuard>} />
+            <Route path="/admin/menu" element={<RoleGuard roles={["admin"]}><AdminMenu /></RoleGuard>} />
+            <Route path="/admin/users" element={<RoleGuard roles={["admin"]}><AdminUsers /></RoleGuard>} />
+            <Route path="/admin/analytics" element={<RoleGuard roles={["admin"]}><AdminAnalytics /></RoleGuard>} />
+            <Route path="/admin/settings" element={<RoleGuard roles={["admin"]}><AdminSettings /></RoleGuard>} />
+          </Route>
         </Routes>
       </BrowserRouter>
+      <Toaster position="top-center" richColors />
     </QueryClientProvider>
   )
 }

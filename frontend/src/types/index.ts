@@ -58,6 +58,7 @@ export type OrderItem = {
   id: string
   menu_item_id: string
   menu_item?: MenuItem
+  name: string
   quantity: number
   unit_price: number
   special_instructions?: string
