@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { ArrowRight, Utensils } from 'lucide-react'
 import api from '@/lib/api'
-import { useAuthStore } from '@/store/auth'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,7 +15,7 @@ export default function RegisterPage() {
   const [studentId, setStudentId] = useState('')
   const [department, setDepartment] = useState('')
   
-  const { setTokens, setUser } = useAuthStore()
+
   const navigate = useNavigate()
 
   const register = useMutation({
@@ -30,7 +30,7 @@ export default function RegisterPage() {
       const { data } = await api.post('/auth/register', payload)
       return data
     },
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       alert("Registration successful! Please check your email to verify your account.");
       navigate('/login')
     },
