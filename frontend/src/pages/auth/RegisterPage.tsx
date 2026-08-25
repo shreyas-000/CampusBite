@@ -59,7 +59,8 @@ export default function RegisterPage() {
         <div className="space-y-5">
           {register.isError && (
             <div className="text-sm font-medium text-red-400 bg-red-400/10 p-3 rounded-xl text-center border border-red-400/20">
-              Registration failed. Email or Student ID may already be in use.
+              {/* @ts-ignore */}
+              {register.error?.response?.data?.detail || "Registration failed. Please try again."}
             </div>
           )}
           
