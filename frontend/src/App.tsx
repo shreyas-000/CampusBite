@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/sonner'
 // Auth
 import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
+import VerifyEmailPage from '@/pages/auth/VerifyEmailPage'
 
 // Student
 import MenuPage from '@/pages/student/MenuPage'
@@ -41,6 +42,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/auth/verify" element={<VerifyEmailPage />} />
 
           <Route element={<AuthenticatedLayout />}>
             <Route path="/" element={<RoleGuard roles={["student"]}><MenuPage /></RoleGuard>} />

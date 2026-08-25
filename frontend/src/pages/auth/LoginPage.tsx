@@ -50,7 +50,8 @@ export default function LoginPage() {
         <div className="space-y-5">
           {login.isError && (
             <div className="text-sm font-medium text-red-400 bg-red-400/10 p-3 rounded-xl text-center border border-red-400/20">
-              Invalid credentials. Please try again.
+              {/* @ts-ignore */}
+              {login.error?.response?.data?.detail || "Invalid credentials. Please try again."}
             </div>
           )}
           

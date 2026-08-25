@@ -31,10 +31,8 @@ export default function RegisterPage() {
       return data
     },
     onSuccess: async (data) => {
-      setTokens(data.access_token, data.refresh_token)
-      const { data: user } = await api.get('/auth/me')
-      setUser(user)
-      navigate('/')
+      alert("Registration successful! Please check your email to verify your account.");
+      navigate('/login')
     },
   })
 
