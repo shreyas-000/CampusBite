@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 30
-    razorpay_key_id: str
-    razorpay_key_secret: str
+    razorpay_key_id: str = ""
+    razorpay_key_secret: str = ""
     frontend_url: str = "http://localhost:5173"
     allowed_origins: str = "http://localhost:5173"
     
