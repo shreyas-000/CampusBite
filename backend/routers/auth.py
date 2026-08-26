@@ -36,9 +36,7 @@ async def register(body: RegisterRequest):
     # Generate verification token
     verification_token = create_verification_token(str(user["id"]))
     
-    # Send magic link email (asynchronously)
-    import asyncio
-    asyncio.create_task(send_magic_link_email(body.email, verification_token))
+    await send_magic_link_email(body.email, verification_token)
     
     return {"message": "Verification email sent. Please check your inbox to activate your account."}
 
