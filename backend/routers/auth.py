@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from core.dependencies import get_current_user
 from core.database import supabase
-from core.security import hash_password, verify_password, create_access_token, create_refresh_token, decode_token, create_verification_token
-from schemas.auth import RegisterRequest, LoginRequest, TokenResponse, RefreshRequest, UpdateProfileRequest, VerifyEmailRequest
+from core.security import hash_password, verify_password, create_access_token, create_refresh_token, decode_token, create_verification_token, create_password_reset_token
+from schemas.auth import RegisterRequest, LoginRequest, TokenResponse, RefreshRequest, UpdateProfileRequest, VerifyEmailRequest, ResendVerificationRequest, ForgotPasswordRequest, ResetPasswordRequest
 from schemas.user import User
-from services.email import send_magic_link_email
+from services.email import send_magic_link_email, send_password_reset_email
 
 router = APIRouter()
 
@@ -75,7 +75,7 @@ async def login(body: LoginRequest):
         raise HTTPException(status_code=401, detail="Invalid credentials")
         
     if not user.get("is_active"):
-        raise HTTPException(status_code=403, detail="Account suspended")
+        raise HTTPException(status_code=403, detail="Email not verified. Please verify your account.")
         
     return TokenResponse(
         access_token=create_access_token(str(user["id"]), user["role"]),
@@ -123,3 +123,57 @@ async def update_me(body: UpdateProfileRequest, current_user: User = Depends(get
         
     updated_user = response.data[0]
     return User(**updated_user)
+
+@router.post("/resend-verification")
+async def resend_verification(body: ResendVerificationRequest):
+    # Check if email exists
+    existing = supabase.table("users").select("id, is_active").eq("email", body.email).execute()
+    if not existing.data:
+        # Return success anyway to prevent email enumeration
+        return {"message": "If the email is registered, a verification link has been sent."}
+        
+    user = existing.data[0]
+    if user.get("is_active"):
+        return {"message": "Account is already verified."}
+        
+    # Generate new verification token
+    verification_token = create_verification_token(str(user["id"]))
+    
+    await send_magic_link_email(body.email, verification_token)
+    
+    return {"message": "Verification email resent. Please check your inbox."}
+
+@router.post("/forgot-password")
+async def forgot_password(body: ForgotPasswordRequest):
+    # Check if user exists
+    response = supabase.table("users").select("id, is_active").eq("email", body.email).execute()
+    
+    # We return success message regardless to prevent email enumeration
+    if response.data:
+        user = response.data[0]
+        # Generate reset token
+        reset_token = create_password_reset_token(str(user["id"]))
+        # Send email
+        await send_password_reset_email(body.email, reset_token)
+        
+    return {"message": "If that email is in our database, we will send a password reset link."}
+
+@router.post("/reset-password")
+async def reset_password(body: ResetPasswordRequest):
+    payload = decode_token(body.token)
+    
+    if not payload or payload.get("type") != "reset_password":
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+        
+    user_id = payload.get("sub")
+    
+    # Hash new password
+    hashed_pwd = hash_password(body.new_password)
+    
+    # Update password
+    response = supabase.table("users").update({"hashed_password": hashed_pwd}).eq("id", user_id).execute()
+    
+    if not response.data:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    return {"message": "Password successfully reset. You can now log in."}

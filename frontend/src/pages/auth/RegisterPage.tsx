@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
-import { ArrowRight, Utensils } from 'lucide-react'
+import { ArrowRight, Utensils, Mail, RefreshCw } from 'lucide-react'
 import api from '@/lib/api'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +15,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [studentId, setStudentId] = useState('')
   const [department, setDepartment] = useState('')
-  
+  const [isSuccess, setIsSuccess] = useState(false)
 
   const navigate = useNavigate()
 
@@ -30,10 +31,26 @@ export default function RegisterPage() {
       const { data } = await api.post('/auth/register', payload)
       return data
     },
-    onSuccess: async () => {
-      alert("Registration successful! Please check your email to verify your account.");
-      navigate('/login')
+    onSuccess: () => {
+      toast.success("Registration successful! Please check your email to verify your account.")
+      setIsSuccess(true)
     },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || "Registration failed. Please try again.")
+    }
+  })
+
+  const resendEmail = useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post('/auth/resend-verification', { email })
+      return data
+    },
+    onSuccess: () => {
+      toast.success("Verification email resent. Please check your inbox.")
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || "Failed to resend email.")
+    }
   })
 
   return (
@@ -44,104 +61,144 @@ export default function RegisterPage() {
 
       <div className="w-full max-w-lg relative z-10 p-8 sm:p-10 bg-white/[0.02] border border-white/[0.05] rounded-3xl backdrop-blur-2xl shadow-[0_0_80px_rgba(255,255,255,0.05)]">
         
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-4 border border-white/20">
-            <Utensils className="w-6 h-6 text-white" />
-          </div>
-          <h1 className="text-3xl font-medium tracking-tight">Sign up</h1>
-          <p className="text-white/50 mt-2 text-center text-sm">
-            Create your CampusBite account
-          </p>
-        </div>
-
-        <div className="space-y-5">
-          {register.isError && (
-            <div className="text-sm font-medium text-red-400 bg-red-400/10 p-3 rounded-xl text-center border border-red-400/20">
-              {/* @ts-ignore */}
-              {register.error?.response?.data?.detail || "Registration failed. Please try again."}
+        {isSuccess ? (
+          <div className="flex flex-col items-center text-center space-y-6">
+            <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center border border-white/20">
+              <Mail className="w-8 h-8 text-white" />
             </div>
-          )}
-          
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div className="space-y-2.5 sm:col-span-2">
-              <Label htmlFor="name" className="text-white/60 text-xs font-medium uppercase tracking-wider">Full Name *</Label>
-              <Input 
-                id="name" 
-                placeholder="John Doe" 
-                value={name} 
-                onChange={e => setName(e.target.value)} 
-                disabled={register.isPending}
-                className="h-12 bg-black/50 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-white/50 focus-visible:border-white/50 transition-all rounded-xl shadow-inner"
-              />
+            <div>
+              <h2 className="text-2xl font-medium tracking-tight mb-2">Check your email</h2>
+              <p className="text-white/60 text-sm">
+                We've sent a verification link to <span className="text-white font-medium">{email}</span>. 
+                Please verify your account to continue.
+              </p>
             </div>
             
-            <div className="space-y-2.5 sm:col-span-2">
-              <Label htmlFor="email" className="text-white/60 text-xs font-medium uppercase tracking-wider">College Email *</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="name@college.edu" 
-                value={email} 
-                onChange={e => setEmail(e.target.value)} 
-                disabled={register.isPending}
-                className="h-12 bg-black/50 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-white/50 focus-visible:border-white/50 transition-all rounded-xl shadow-inner"
-              />
-            </div>
-            
-            <div className="space-y-2.5">
-              <Label htmlFor="studentId" className="text-white/60 text-xs font-medium uppercase tracking-wider">Student ID</Label>
-              <Input 
-                id="studentId" 
-                placeholder="Optional" 
-                value={studentId} 
-                onChange={e => setStudentId(e.target.value)} 
-                disabled={register.isPending}
-                className="h-12 bg-black/50 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-white/50 focus-visible:border-white/50 transition-all rounded-xl shadow-inner"
-              />
-            </div>
-            
-            <div className="space-y-2.5">
-              <Label htmlFor="department" className="text-white/60 text-xs font-medium uppercase tracking-wider">Department</Label>
-              <Input 
-                id="department" 
-                placeholder="Optional" 
-                value={department} 
-                onChange={e => setDepartment(e.target.value)} 
-                disabled={register.isPending}
-                className="h-12 bg-black/50 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-white/50 focus-visible:border-white/50 transition-all rounded-xl shadow-inner"
-              />
-            </div>
-            
-            <div className="space-y-2.5 sm:col-span-2">
-              <Label htmlFor="password" className="text-white/60 text-xs font-medium uppercase tracking-wider">Password *</Label>
-              <Input 
-                id="password" 
-                type="password" 
-                placeholder="••••••••"
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
-                disabled={register.isPending}
-                className="h-12 bg-black/50 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-white/50 focus-visible:border-white/50 transition-all rounded-xl shadow-inner"
-              />
+            <div className="flex flex-col w-full gap-3 mt-4">
+              <Button 
+                className="w-full h-12 bg-white text-black hover:bg-neutral-200 font-medium transition-all rounded-xl"
+                onClick={() => navigate('/login')}
+              >
+                Go to Sign in
+              </Button>
+              
+              <Button 
+                variant="outline"
+                className="w-full h-12 bg-transparent border-white/20 text-white hover:bg-white/10 font-medium transition-all rounded-xl flex items-center justify-center gap-2"
+                onClick={() => resendEmail.mutate()}
+                disabled={resendEmail.isPending}
+              >
+                {resendEmail.isPending ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                {resendEmail.isPending ? 'Resending...' : 'Resend Verification Email'}
+              </Button>
             </div>
           </div>
+        ) : (
+          <>
+            <div className="flex flex-col items-center mb-8">
+              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-4 border border-white/20">
+                <Utensils className="w-6 h-6 text-white" />
+              </div>
+              <h1 className="text-3xl font-medium tracking-tight">Sign up</h1>
+              <p className="text-white/50 mt-2 text-center text-sm">
+                Create your CampusBite account
+              </p>
+            </div>
 
-          <Button 
-            className="w-full h-12 bg-white text-black hover:bg-neutral-200 font-medium transition-all rounded-xl mt-4 flex items-center justify-center gap-2 group" 
-            onClick={() => register.mutate()} 
-            disabled={register.isPending || !email || !password || !name}
-          >
-            {register.isPending ? 'Creating account...' : 'Sign up'}
-            {!register.isPending && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
-          </Button>
+            <div className="space-y-5">
+              {register.isError && (
+                <div className="text-sm font-medium text-red-400 bg-red-400/10 p-3 rounded-xl text-center border border-red-400/20">
+                  {/* @ts-ignore */}
+                  {register.error?.response?.data?.detail || "Registration failed. Please try again."}
+                </div>
+              )}
+              
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-2.5 sm:col-span-2">
+                  <Label htmlFor="name" className="text-white/60 text-xs font-medium uppercase tracking-wider">Full Name *</Label>
+                  <Input 
+                    id="name" 
+                    placeholder="John Doe" 
+                    value={name} 
+                    onChange={e => setName(e.target.value)} 
+                    disabled={register.isPending}
+                    className="h-12 bg-black/50 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-white/50 focus-visible:border-white/50 transition-all rounded-xl shadow-inner"
+                  />
+                </div>
+                
+                <div className="space-y-2.5 sm:col-span-2">
+                  <Label htmlFor="email" className="text-white/60 text-xs font-medium uppercase tracking-wider">College Email *</Label>
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="name@college.edu" 
+                    value={email} 
+                    onChange={e => setEmail(e.target.value)} 
+                    disabled={register.isPending}
+                    className="h-12 bg-black/50 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-white/50 focus-visible:border-white/50 transition-all rounded-xl shadow-inner"
+                  />
+                </div>
+                
+                <div className="space-y-2.5">
+                  <Label htmlFor="studentId" className="text-white/60 text-xs font-medium uppercase tracking-wider">Student ID</Label>
+                  <Input 
+                    id="studentId" 
+                    placeholder="Optional" 
+                    value={studentId} 
+                    onChange={e => setStudentId(e.target.value)} 
+                    disabled={register.isPending}
+                    className="h-12 bg-black/50 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-white/50 focus-visible:border-white/50 transition-all rounded-xl shadow-inner"
+                  />
+                </div>
+                
+                <div className="space-y-2.5">
+                  <Label htmlFor="department" className="text-white/60 text-xs font-medium uppercase tracking-wider">Department</Label>
+                  <Input 
+                    id="department" 
+                    placeholder="Optional" 
+                    value={department} 
+                    onChange={e => setDepartment(e.target.value)} 
+                    disabled={register.isPending}
+                    className="h-12 bg-black/50 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-white/50 focus-visible:border-white/50 transition-all rounded-xl shadow-inner"
+                  />
+                </div>
+                
+                <div className="space-y-2.5 sm:col-span-2">
+                  <Label htmlFor="password" className="text-white/60 text-xs font-medium uppercase tracking-wider">Password *</Label>
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    placeholder="••••••••"
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)} 
+                    disabled={register.isPending}
+                    className="h-12 bg-black/50 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-white/50 focus-visible:border-white/50 transition-all rounded-xl shadow-inner"
+                  />
+                </div>
+              </div>
 
-          <div className="text-center pt-4">
-            <span className="text-white/40 text-sm">Already have an account? </span>
-            <Link to="/login" className="text-white hover:text-white/80 font-medium text-sm transition-colors">
-              Sign in
-            </Link>
-          </div>
-        </div>
+              <Button 
+                className="w-full h-12 bg-white text-black hover:bg-neutral-200 font-medium transition-all rounded-xl mt-4 flex items-center justify-center gap-2 group" 
+                onClick={() => register.mutate()} 
+                disabled={register.isPending || !email || !password || !name}
+              >
+                {register.isPending ? 'Creating account...' : 'Sign up'}
+                {!register.isPending && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+              </Button>
+
+              <div className="text-center pt-4">
+                <span className="text-white/40 text-sm">Already have an account? </span>
+                <Link to="/login" className="text-white hover:text-white/80 font-medium text-sm transition-colors">
+                  Sign in
+                </Link>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

@@ -25,3 +25,13 @@ class VerifyEmailRequest(BaseModel):
 class UpdateProfileRequest(BaseModel):
     name: str | None = None
     department: str | None = None
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str

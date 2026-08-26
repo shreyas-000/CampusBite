@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
-import { ArrowRight, Utensils } from 'lucide-react'
+import { ArrowRight, Utensils, RefreshCw } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from 'sonner'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -29,6 +30,19 @@ export default function LoginPage() {
     },
   })
 
+  const resendEmail = useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post('/auth/resend-verification', { email })
+      return data
+    },
+    onSuccess: () => {
+      toast.success("Verification email resent. Please check your inbox.")
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || "Failed to resend email.")
+    }
+  })
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white p-4 relative overflow-hidden">
       {/* Dynamic Background */}
@@ -49,9 +63,23 @@ export default function LoginPage() {
 
         <div className="space-y-5">
           {login.isError && (
-            <div className="text-sm font-medium text-red-400 bg-red-400/10 p-3 rounded-xl text-center border border-red-400/20">
+            <div className="flex flex-col gap-3">
+              <div className="text-sm font-medium text-red-400 bg-red-400/10 p-3 rounded-xl text-center border border-red-400/20">
+                {/* @ts-ignore */}
+                {login.error?.response?.data?.detail || "Invalid credentials. Please try again."}
+              </div>
               {/* @ts-ignore */}
-              {login.error?.response?.data?.detail || "Invalid credentials. Please try again."}
+              {login.error?.response?.data?.detail?.includes("Email not verified") && (
+                <Button 
+                  variant="outline"
+                  className="w-full h-10 bg-transparent border-white/20 text-white hover:bg-white/10 font-medium transition-all rounded-xl flex items-center justify-center gap-2"
+                  onClick={() => resendEmail.mutate()}
+                  disabled={resendEmail.isPending}
+                >
+                  {resendEmail.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                  Resend Verification Email
+                </Button>
+              )}
             </div>
           )}
           
@@ -69,7 +97,12 @@ export default function LoginPage() {
           </div>
           
           <div className="space-y-2.5">
-            <Label htmlFor="password" className="text-white/60 text-xs font-medium uppercase tracking-wider">Password</Label>
+            <div className="flex justify-between items-center">
+              <Label htmlFor="password" className="text-white/60 text-xs font-medium uppercase tracking-wider">Password</Label>
+              <Link to="/forgot-password" className="text-white/50 hover:text-white text-xs font-medium transition-colors">
+                Forgot password?
+              </Link>
+            </div>
             <Input 
               id="password" 
               type="password" 
