@@ -1,3 +1,11 @@
+import sys
+from pathlib import Path
+
+# Add backend directory to Python path for Vercel serverless functions
+backend_dir = str(Path(__file__).parent.parent)
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
